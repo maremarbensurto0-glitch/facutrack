@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+
+{% block title %}Sign in · FacuTrack{% endblock %}
+
+{% block content %}
+<section class="ft-section" style="min-height: calc(100vh - 80px); display: flex; align-items: center;">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-md-7 col-lg-5" data-aos="fade-up">
+        <div class="ft-glass p-4 p-md-5" style="border-radius: 28px;">
+          <div class="text-center mb-4">
+            <span class="ft-eyebrow">FacuTrack</span>
+            <h1 class="display-6 mb-2">Welcome back</h1>
+            <p class="text-muted mb-0">Sign in to access your dashboard.</p>
+          </div>
+
+          <form method="post" novalidate>
+            {% csrf_token %}
+
+            {% if locked %}
+              <div class="alert alert-danger small mb-3" role="alert">
+                <i class="bi bi-shield-exclamation"></i>
+                Account locked. Please wait <span id="ftLockoutCountdown" data-seconds="{{ retry_after }}">{{ retry_after }}</span> seconds before trying again.
+              </div>
+            {% endif %}
+
+            {% if form.non_field_errors %}
+              <div class="alert alert-danger small mb-3" role="alert">
+                {{ form.non_field_errors|join:" " }}
+              </div>
+            {% endif %}
+
+            <div class="mb-3">
+              <label class="form-label" for="{{ form.username.id_for_label }}">Username</label>
+              {{ form.username }}
+              {% if form.username.errors %}
+                <div class="form-text text-danger">{{ form.username.errors|join:" " }}</div>
+              {% endif %}
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label" for="{{ form.password.id_for_label }}">Password</label>
+              <div class="input-group">
+                {{ form.password }}
+                <button class="btn btn-outline-secondary" type="button" id="ftTogglePassword" aria-label="Toggle password visibility" {% if locked %}disabled{% endif %}>
+                  <i class="bi bi-eye"></i>
+                </button>
+              </div>
+              {% if form.password.errors %}
+                <div class="form-text text-danger">{{ form.password.errors|join:" " }}</div>
+              {% endif %}
+            </div>
+
+            <div class="form-check mb-4">
+              <input class="form-check-input" type="checkbox" id="ftShowPassword" {% if locked %}disabled{% endif %}>
+              <label class="form-check-label" for="ftShowPassword">Show password</label>
+            </div>
+
+            <button type="submit" class="ft-btn ft-btn--primary w-100 justify-content-center mb-3" {% if locked %}disabled{% endif %}>
+              <i class="bi bi-box-arrow-in-right"></i> {% if locked %}Locked…{% else %}Login{% endif %}
+            </button>
+            <a href="{% url 'facutrack_app:landing' %}" class="ft-btn w-100 justify-content-center">
+              <i class="bi bi-arrow-left"></i> Back Home
+            </a>
+          </form>
+
+          <p class="text-center text-muted small mt-4 mb-0">
+            New to FacuTrack? <a href="{% url 'facutrack_app:ratepage' %}">Evaluate a faculty</a> — no account required.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  (function () {
+    var pwd = document.getElementById('id_password');
+    var toggle = document.getElementById('ftTogglePassword');
+    var check = document.getElementById('ftShowPassword');
+    if (!pwd) return;
+    function setVisible(visible) {
+      pwd.type = visible ? 'text' : 'password';
+      var icon = toggle && toggle.querySelector('i');
+      if (icon) icon.className = visible ? 'bi bi-eye-slash' : 'bi bi-eye';
+      if (check) check.checked = visible;
+    }
+    if (toggle) toggle.addEventListener('click', function () { setVisible(pwd.type === 'password'); });
+    if (check)  check.addEventListener('change', function () { setVisible(check.checked); });
+
+    var cd = document.getElementById('ftLockoutCountdown');
+    if (cd) {
+      var remaining = parseInt(cd.getAttribute('data-seconds') || '0', 10);
+      var timer = setInterval(function () {
+        remaining -= 1;
+        cd.textContent = remaining;
+        if (remaining <= 0) {
+          clearInterval(timer);
+          window.location.reload();
+        }
+      }, 1000);
+    }
+  })();
+</script>
+{% endblock %}

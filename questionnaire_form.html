@@ -1,0 +1,27 @@
+{% extends "ADMIN/admin_base.html" %}
+{% block admin_title %}{% if mode == 'create' %}New Question{% else %}Edit Question{% endif %}{% endblock %}
+
+{% block admin_content %}
+<div class="ft-page-header">
+  <div><h1>{% if mode == 'create' %}Add Question{% else %}Edit Question{% endif %}</h1></div>
+  <div class="d-flex gap-2">
+    <button class="ft-btn ft-sidebar-toggle"><i class="bi bi-list"></i></button>
+    <a class="ft-btn" href="{% url 'facutrack_app:questionnaire_management' %}"><i class="bi bi-arrow-left"></i> Back</a>
+  </div>
+</div>
+
+<form method="post" class="ft-card" novalidate>
+  {% csrf_token %}
+  <div class="mb-3">
+    <label class="form-label">Question</label>
+    {{ form.question }}
+    {% if form.question.errors %}<div class="form-text text-danger">{{ form.question.errors|join:" " }}</div>{% endif %}
+  </div>
+  <div class="d-flex justify-content-end gap-2">
+    <a class="ft-btn" href="{% url 'facutrack_app:questionnaire_management' %}">Cancel</a>
+    <button class="ft-btn ft-btn--primary" type="submit">
+      <i class="bi bi-check2-circle"></i> {% if mode == 'create' %}Save{% else %}Update{% endif %}
+    </button>
+  </div>
+</form>
+{% endblock %}

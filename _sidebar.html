@@ -1,0 +1,71 @@
+<aside class="ft-sidebar">
+  <div class="ft-sidebar__brand">
+    <div class="d-flex align-items-center justify-content-between">
+      <span><i class="bi bi-mortarboard-fill text-accent me-2"></i>FacuTrack</span>
+      <button class="ft-btn ft-sidebar-close p-2" aria-label="Close sidebar">
+        <i class="bi bi-x-lg"></i>
+      </button>
+    </div>
+  </div>
+  <div class="ft-sidebar__group">Overview</div>
+  <ul class="ft-sidebar__nav">
+    <li><a href="{% url 'facutrack_app:admin_dashboard' %}" class="{% if active_nav == 'dashboard' %}active{% endif %}">
+        <i class="bi bi-grid-1x2"></i> Home
+    </a></li>
+  </ul>
+
+  <div class="ft-sidebar__group">Management</div>
+  <ul class="ft-sidebar__nav">
+    <li><a href="{% url 'facutrack_app:user_management' %}" class="{% if active_nav == 'users' %}active{% endif %}">
+        <i class="bi bi-people"></i> User Management
+    </a></li>
+    <li><a href="{% url 'facutrack_app:department_management' %}" class="{% if active_nav == 'departments' %}active{% endif %}">
+        <i class="bi bi-diagram-3"></i> Grade Levels
+    </a></li>
+    <li><a href="{% url 'facutrack_app:questionnaire_management' %}" class="{% if active_nav == 'questionnaire' %}active{% endif %}">
+        <i class="bi bi-ui-checks"></i> Questionnaire
+    </a></li>
+    <li><a href="{% url 'facutrack_app:faculty_rankings' %}" class="{% if active_nav == 'rankings' %}active{% endif %}">
+        <i class="bi bi-trophy"></i> Rankings
+    </a></li>
+  </ul>
+
+  <div class="ft-sidebar__group">Insights</div>
+  <ul class="ft-sidebar__nav">
+    <li><a href="{% url 'facutrack_app:analytics_hub' %}" class="{% if active_nav == 'analytics' %}active{% endif %}">
+        <i class="bi bi-cpu"></i> Analytics &amp; Insights
+    </a></li>
+    <li><a href="{% url 'facutrack_app:reports_page' %}" class="{% if active_nav == 'reports' %}active{% endif %}">
+        <i class="bi bi-file-earmark-bar-graph"></i> Generate Reports
+    </a></li>
+    <li><a href="{% url 'facutrack_app:system_logs' %}" class="{% if active_nav == 'logs' %}active{% endif %}">
+        <i class="bi bi-terminal"></i> Logs
+    </a></li>
+  </ul>
+
+  <div class="ft-sidebar__group">Account</div>
+  <ul class="ft-sidebar__nav">
+    <li><a href="{% url 'facutrack_app:landing' %}">
+        <i class="bi bi-globe"></i> Public Site
+    </a></li>
+    <li><a href="#" data-bs-toggle="modal" data-bs-target="#ftLogoutModal">
+        <i class="bi bi-box-arrow-right"></i> Logout
+    </a></li>
+  </ul>
+</aside>
+
+<div class="modal fade" id="ftLogoutModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content ft-glass">
+      <div class="modal-body p-4 text-center">
+        <i class="bi bi-box-arrow-right fs-1 text-accent"></i>
+        <h4 class="mt-2">Confirm Logout</h4>
+        <p class="text-muted">Are you sure you want to logout?</p>
+        <div class="d-flex gap-2 justify-content-center mt-3">
+          <button type="button" class="ft-btn" data-bs-dismiss="modal">Cancel</button>
+          <a href="{% url 'facutrack_app:logout' %}" class="ft-btn ft-btn--primary">Yes, Logout</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

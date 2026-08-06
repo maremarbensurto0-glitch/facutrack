@@ -1,0 +1,141 @@
+{% extends "STAFF/staff_base.html" %}
+{% block staff_title %}Dashboard{% endblock %}
+
+{% block staff_content %}
+<div class="ft-page-header">
+  <div>
+    <h1>Welcome, {{ user_profile.display_name }}.</h1>
+    <p>Your personal performance hub. Detailed metrics update in real time.</p>
+  </div>
+  <div class="d-flex gap-2">
+    <button class="ft-btn ft-sidebar-toggle"><i class="bi bi-list"></i></button>
+    <a class="ft-btn" href="{% url 'facutrack_app:faculty_feedback' %}"><i class="bi bi-chat-square-text"></i> View All Feedback</a>
+  </div>
+</div>
+
+<div class="row g-3 mb-3">
+  <div class="col-md-3">
+    <div class="ft-card h-100">
+      <small class="text-muted text-uppercase">Current Rank</small>
+      <div class="ft-counter">#{{ rank|default:"—" }}</div>
+      <small class="text-muted">of {{ total_faculty }} faculty</small>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="ft-card h-100">
+      <small class="text-muted text-uppercase">Total Rating</small>
+      <div class="ft-counter">{{ summary.percentage }}%</div>
+      <span class="ft-pill ft-pill--info">{{ summary.label }}</span>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="ft-card h-100">
+      <small class="text-muted text-uppercase">Total Evaluations</small>
+      <div class="ft-counter">{{ summary.total_evaluations }}</div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="ft-card h-100">
+      <small class="text-muted text-uppercase">Status</small>
+      <div class="ft-counter text-{{ status_band }}">
+        <i class="bi bi-{% if status == 'Passed' %}check-circle-fill{% else %}exclamation-circle-fill{% endif %}"></i>
+      </div>
+      <span class="ft-pill ft-pill--{{ status_band }}">{{ status }} Performance</span>
+    </div>
+  </div>
+</div>
+
+<div class="row g-3 mb-3">
+  <div class="col-lg-8">
+    <form class="ft-toolbar" method="get">
+      <label class="text-muted small">Period:</label>
+      <select name="range" class="form-select" onchange="this.form.submit()">
+        <option value="7d"  {% if range_key == '7d'  %}selected{% endif %}>Last 7 days</option>
+        <option value="1m"  {% if range_key == '1m'  %}selected{% endif %}>Last 30 days</option>
+        <option value="3m"  {% if range_key == '3m'  %}selected{% endif %}>Last 90 days</option>
+        <option value="6m"  {% if range_key == '6m'  %}selected{% endif %}>Last 6 months</option>
+        <option value="1y"  {% if range_key == '1y'  %}selected{% endif %}>Last year</option>
+        <option value="all" {% if range_key == 'all' %}selected{% endif %}>All time</option>
+      </select>
+    </form>
+    <div class="ft-card">
+      <h5 class="mb-3"><i class="bi bi-graph-up-arrow me-2 text-accent"></i>Rating Trend &amp; Forecast</h5>
+      <canvas id="ftTrend" height="120"></canvas>
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <div class="ft-card h-100">
+      <h5 class="mb-3"><i class="bi bi-pie-chart me-2 text-accent"></i>Rating Distribution</h5>
+      <canvas id="ftDoughnut" height="220"></canvas>
+    </div>
+  </div>
+</div>
+
+<div class="ft-card">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h5 class="mb-0"><i class="bi bi-chat-square-text me-2 text-accent"></i>Recent Feedback</h5>
+    <a href="{% url 'facutrack_app:faculty_feedback' %}" class="ft-pill ft-pill--info">View all</a>
+  </div>
+  <div class="table-responsive">
+    <table class="ft-data-table m-0">
+      <thead>
+        <tr><th>Date</th><th>Grade Level</th><th>Grade &amp; Section</th><th>Evaluator</th><th>Average</th><th>Action</th></tr>
+      </thead>
+      <tbody>
+        {% for e in feedback_page %}
+          <tr>
+            <td>{{ e.created_at|date:"M d, Y" }}</td>
+            <td>{{ e.department.department_name|default:"—" }}</td>
+            <td>{{ e.course_section|default:"—" }}</td>
+            <td>Anonymous</td>
+            <td>
+              <span class="ft-pill ft-pill--{% if e.average_rating >= 4 %}success{% elif e.average_rating >= 3 %}warning{% else %}danger{% endif %}">
+                {{ e.average_rating|floatformat:1 }}
+              </span>
+            </td>
+            <td><a class="ft-btn" href="{% url 'facutrack_app:faculty_feedback_detail' e.id %}"><i class="bi bi-eye"></i></a></td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="6" class="text-center text-muted py-4">No feedback received yet for the selected period.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% if feedback_page.has_other_pages %}
+  <nav class="mt-3"><ul class="pagination justify-content-center">
+    {% if feedback_page.has_previous %}<li class="page-item"><a class="page-link" href="?page={{ feedback_page.previous_page_number }}&range={{ range_key }}">Previous</a></li>{% endif %}
+    <li class="page-item disabled"><span class="page-link">Page {{ feedback_page.number }} of {{ feedback_page.paginator.num_pages }}</span></li>
+    {% if feedback_page.has_next %}<li class="page-item"><a class="page-link" href="?page={{ feedback_page.next_page_number }}&range={{ range_key }}">Next</a></li>{% endif %}
+  </ul></nav>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script>
+  var palette = ['#ef4444','#f97316','#eab308','#22c55e','#0ea5e9'];
+  var dist = {{ distribution_json|safe }};
+  new Chart(document.getElementById('ftDoughnut'), {
+    type: 'doughnut',
+    data: { labels: ['1 star','2 stars','3 stars','4 stars','5 stars'],
+            datasets: [{ data: [dist['1']||0, dist['2']||0, dist['3']||0, dist['4']||0, dist['5']||0],
+                         backgroundColor: palette, borderWidth: 0 }] },
+    options: { plugins: { legend: { position: 'bottom' } }, cutout: '60%' },
+  });
+
+  var labels = {{ trend_labels|safe }};
+  var history = {{ trend_history|safe }};
+  var forecast = {{ trend_forecast|safe }};
+  new Chart(document.getElementById('ftTrend'), {
+    type: 'line',
+    data: { labels: labels,
+            datasets: [
+              { label: 'History',  data: history,  borderColor: '#d4af7f', backgroundColor: 'rgba(212,175,127,.2)', fill: true, tension: 0.3 },
+              { label: 'Forecast', data: forecast, borderColor: '#38bdf8', borderDash: [5,5], fill: false, tension: 0.3 },
+            ] },
+    options: { scales: { y: { beginAtZero: true, max: 5 } } },
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,177 @@
+{% extends "base.html" %}
+
+{% block title %}Rate Faculty · FacuTrack{% endblock %}
+
+{% block content %}
+
+<section class="ft-section" style="padding-top: 4rem;">
+  <div class="container">
+    <div class="row justify-content-center mb-4">
+      <div class="col-lg-9" data-aos="fade-up">
+        <div class="ft-glass p-4 d-flex align-items-start gap-3" style="border-radius: 18px;">
+          <i class="bi bi-shield-check fs-3 text-accent"></i>
+          <div>
+            <h5 class="mb-1">Your evaluation is completely anonymous.</h5>
+            <p class="mb-0 text-muted">No personal information is required and your responses remain confidential. Providing an email lets you resume a draft evaluation.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <form method="post" id="evaluationForm" novalidate>
+      {% csrf_token %}
+
+      <div class="ft-card mb-4" data-aos="fade-up">
+        <h4 class="mb-3"><i class="bi bi-person-vcard me-2 text-accent"></i>Identification</h4>
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label" for="{{ form.email.id_for_label }}">Email <span class="text-danger">*</span></label>
+            {{ form.email }}
+            <div class="form-text">Used only to auto-save your progress.</div>
+            {% if form.email.errors %}<div class="form-text text-danger">{{ form.email.errors|join:" " }}</div>{% endif %}
+          </div>
+          <div class="col-md-6">
+            <label class="form-label" for="{{ form.full_name.id_for_label }}">Full name <span class="text-muted">(optional)</span></label>
+            {{ form.full_name }}
+          </div>
+        </div>
+      </div>
+
+      <div class="ft-card mb-4" data-aos="fade-up" data-aos-delay="50">
+        <h4 class="mb-3"><i class="bi bi-mortarboard me-2 text-accent"></i>Grade &amp; Section Information</h4>
+        <div class="row g-3">
+          <div class="col-md-4">
+            <label class="form-label" for="{{ form.department.id_for_label }}">Grade Level</label>
+            {{ form.department }}
+          </div>
+          <div class="col-md-4">
+            <label class="form-label" for="{{ form.course_section.id_for_label }}">Grade &amp; Section</label>
+            {{ form.course_section }}
+            <div class="form-text">e.g. G7-Diamond</div>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label" for="{{ form.faculty.id_for_label }}">Faculty</label>
+            {{ form.faculty }}
+          </div>
+        </div>
+        {% if form.non_field_errors %}<div class="form-text text-danger mt-2">{{ form.non_field_errors|join:" " }}</div>{% endif %}
+      </div>
+
+      <div class="ft-card mb-4" data-aos="fade-up" data-aos-delay="100">
+        <div class="d-flex align-items-center justify-content-between mb-3">
+          <h4 class="mb-0"><i class="bi bi-ui-checks me-2 text-accent"></i>Questionnaire</h4>
+          <span class="text-muted small">1 = Very Dissatisfied · 5 = Very Satisfied</span>
+        </div>
+
+        {% if questionnaires %}
+          {% for q in questionnaires %}
+            <div class="py-3 border-top border-secondary-subtle">
+              <p class="fw-semibold mb-2">{{ forloop.counter }}. {{ q.question }}</p>
+              <div class="btn-group" role="group" aria-label="Rating for question {{ forloop.counter }}">
+                {% for i in "12345" %}
+                  <input type="radio" class="btn-check" name="q_{{ q.id }}" id="q_{{ q.id }}_{{ forloop.counter }}" value="{{ forloop.counter }}" required>
+                  <label class="btn btn-outline-warning" for="q_{{ q.id }}_{{ forloop.counter }}">{{ forloop.counter }}</label>
+                {% endfor %}
+              </div>
+            </div>
+          {% endfor %}
+        {% else %}
+          <p class="text-muted mb-0">No questions have been published yet. Please check back later.</p>
+        {% endif %}
+      </div>
+
+      <div class="ft-card mb-4" data-aos="fade-up" data-aos-delay="150">
+        <h4 class="mb-3"><i class="bi bi-chat-left-text me-2 text-accent"></i>Additional Comments <span class="text-muted small">(optional)</span></h4>
+        <label class="form-label" for="{{ form.comments.id_for_label }}">Share any extra thoughts or suggestions</label>
+        {{ form.comments }}
+        {% if form.comments.errors %}<div class="form-text text-danger">{{ form.comments.errors|join:" " }}</div>{% endif %}
+      </div>
+
+      <div class="d-flex justify-content-end gap-2">
+        <a href="{% url 'facutrack_app:landing' %}" class="ft-btn">
+          <i class="bi bi-arrow-left"></i> Cancel
+        </a>
+        <button type="submit" class="ft-btn ft-btn--primary" {% if not questionnaires %}disabled{% endif %}>
+          <i class="bi bi-send"></i> Submit Evaluation
+        </button>
+      </div>
+    </form>
+  </div>
+</section>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  (function () {
+    document.querySelectorAll('.btn-group input[type="radio"]').forEach(function (input) {
+      input.addEventListener('change', function () {
+        var name = input.name;
+        document.querySelectorAll('label[for^="' + name + '_"]').forEach(function (lbl) {
+          lbl.classList.remove('btn-warning');
+          lbl.classList.add('btn-outline-warning');
+        });
+        var selected = document.querySelector('label[for="' + input.id + '"]');
+        if (selected) {
+          selected.classList.remove('btn-outline-warning');
+          selected.classList.add('btn-warning');
+        }
+        scheduleSave();
+      });
+    });
+
+    var dept = document.getElementById('id_department');
+    var faculty = document.getElementById('id_faculty');
+    
+    function loadFaculty(selectedDeptId) {
+      if (!selectedDeptId || !faculty) return;
+      var url = '{% url "facutrack_app:faculty_by_department" %}?department=' + encodeURIComponent(selectedDeptId);
+      fetch(url, { credentials: 'same-origin' })
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+          faculty.innerHTML = '<option value="">Select faculty</option>';
+          (data.faculty || []).forEach(function (f) {
+            var opt = document.createElement('option');
+            opt.value = f.id;
+            opt.textContent = f.name;
+            if ('{{ form.faculty.value|default:"" }}' && f.id == '{{ form.faculty.value|default:"" }}') {
+              opt.selected = true;
+            }
+            faculty.appendChild(opt);
+          });
+        });
+    }
+    
+    if (dept && faculty) {
+      dept.addEventListener('change', function () {
+        loadFaculty(dept.value);
+      });
+      if (dept.value) {
+        loadFaculty(dept.value);
+      }
+    }
+
+    var emailInput = document.getElementById('{{ form.email.id_for_label }}');
+    var saveTimer = null;
+    function scheduleSave() {
+      clearTimeout(saveTimer);
+      saveTimer = setTimeout(saveDraft, 1500);
+    }
+    function saveDraft() {
+      if (!emailInput || !emailInput.value) return;
+      var data = {};
+      document.querySelectorAll('input[name^="q_"]:checked').forEach(function (i) {
+        data[i.name] = i.value;
+      });
+      fetch('{% url "facutrack_app:autosave_draft" %}', {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}' },
+        body: JSON.stringify({ email: emailInput.value, data: data })
+      });
+    }
+    if (emailInput) emailInput.addEventListener('change', scheduleSave);
+  })();
+</script>
+{% endblock %}
+

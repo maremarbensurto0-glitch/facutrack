@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Receipt · FacuTrack{% endblock %}
+
+{% block content %}
+<section class="ft-section" style="padding-top: 4rem;">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-7" data-aos="fade-up">
+        <div class="ft-glass p-4 p-md-5 text-center" style="border-radius: 28px;">
+          <i class="bi bi-check-circle-fill fs-1 text-accent"></i>
+          <h1 class="display-6 mt-2">Evaluation Submitted</h1>
+          <p class="text-muted">Take a screenshot of this receipt for your reference.</p>
+          <hr class="ft-divider mx-auto">
+          <dl class="row text-start mt-3 mb-0">
+            <dt class="col-5 text-muted">Receipt Number</dt>
+            <dd class="col-7"><code class="fs-5">{{ evaluation.receipt_code }}</code></dd>
+            <dt class="col-5 text-muted">Date</dt>
+            <dd class="col-7">{{ evaluation.created_at|date:"M d, Y H:i" }}</dd>
+            <dt class="col-5 text-muted">Faculty</dt>
+            <dd class="col-7">{{ evaluation.faculty.profile.full_name|default:evaluation.faculty.username|default:"—" }}</dd>
+            <dt class="col-5 text-muted">Grade Level</dt>
+            <dd class="col-7">{{ evaluation.department.department_name|default:"—" }}</dd>
+            <dt class="col-5 text-muted">Grade &amp; Section</dt>
+            <dd class="col-7">{{ evaluation.course_section|default:"—" }}</dd>
+            <dt class="col-5 text-muted">Evaluator</dt>
+            <dd class="col-7">{{ evaluation.full_name|default:"Anonymous" }}</dd>
+            {% if evaluation.comments %}
+              <dt class="col-5 text-muted">Comments</dt>
+              <dd class="col-7">{{ evaluation.comments }}</dd>
+            {% endif %}
+          </dl>
+          <div class="d-flex gap-2 justify-content-center mt-4">
+            <a class="ft-btn" href="{% url 'facutrack_app:ratepage' %}"><i class="bi bi-arrow-repeat"></i> Evaluate Another</a>
+            <a class="ft-btn ft-btn--primary" href="{% url 'facutrack_app:landing' %}"><i class="bi bi-house"></i> Back Home</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,58 @@
+{% extends "ADMIN/admin_base.html" %}
+{% block admin_title %}Test SMTP{% endblock %}
+
+{% block admin_content %}
+<div class="ft-page-header">
+  <div>
+    <h1>Test SMTP</h1>
+    <p>Send a one-off email to confirm the SMTP relay is reachable.</p>
+  </div>
+  <div class="d-flex gap-2">
+    <button class="ft-btn ft-sidebar-toggle"><i class="bi bi-list"></i></button>
+    <a class="ft-btn" href="{% url 'facutrack_app:user_management' %}"><i class="bi bi-arrow-left"></i> Back to Users</a>
+  </div>
+</div>
+
+<div class="row g-3">
+  <div class="col-lg-7">
+    <form method="post" class="ft-card" novalidate>
+      {% csrf_token %}
+      <div class="mb-3">
+        <label class="form-label" for="ftSmtpTo">Recipient</label>
+        <input type="email" id="ftSmtpTo" name="to" class="form-control"
+               value="{{ default_to }}" placeholder="recipient@example.com">
+        <div class="form-text">Defaults to your own email address.</div>
+      </div>
+      <button type="submit" class="ft-btn ft-btn--primary">
+        <i class="bi bi-send"></i> Send Test Email
+      </button>
+    </form>
+  </div>
+
+  <div class="col-lg-5">
+    <div class="ft-card h-100">
+      <h5 class="mb-2"><i class="bi bi-info-circle me-1 text-accent"></i>Current Configuration</h5>
+      <dl class="row mb-0 small">
+        <dt class="col-5 text-muted">Backend</dt><dd class="col-7"><code>{{ settings.EMAIL_BACKEND|default:"—" }}</code></dd>
+        <dt class="col-5 text-muted">Host</dt><dd class="col-7"><code>{{ settings.EMAIL_HOST|default:"—" }}:{{ settings.EMAIL_PORT }}</code></dd>
+        <dt class="col-5 text-muted">User</dt><dd class="col-7"><code>{{ settings.EMAIL_HOST_USER|default:"—" }}</code></dd>
+        <dt class="col-5 text-muted">TLS / SSL</dt><dd class="col-7">{{ settings.EMAIL_USE_TLS }} / {{ settings.EMAIL_USE_SSL }}</dd>
+        <dt class="col-5 text-muted">From</dt><dd class="col-7"><code>{{ settings.DEFAULT_FROM_EMAIL|default:"—" }}</code></dd>
+        <dt class="col-5 text-muted">Site URL</dt><dd class="col-7"><code>{{ settings.SITE_URL|default:"—" }}</code></dd>
+      </dl>
+    </div>
+  </div>
+
+  <div class="col-12">
+    <div class="ft-card">
+      <h6 class="text-uppercase text-muted small mb-2">Troubleshooting</h6>
+      <ul class="small mb-0 text-muted">
+        <li>For Gmail, use an <a href="https://myaccount.google.com/apppasswords" target="_blank" rel="noopener">App Password</a>, not your account password.</li>
+        <li>Port <code>587</code> + TLS or port <code>465</code> + SSL are the most reliable combinations.</li>
+        <li>If you see <em>“SMTP test failed”</em>, the exception message is shown in the toast – copy it for debugging.</li>
+        <li>For local development you can fall back to the console backend by setting <code>EMAIL_BACKEND_NAME=console</code>.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+{% endblock %}

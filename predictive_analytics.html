@@ -1,0 +1,114 @@
+{% extends "ADMIN/admin_base.html" %}
+{% block admin_title %}Predictive Analytics{% endblock %}
+
+{% block admin_content %}
+<div class="ft-page-header">
+  <div>
+    <h1>Predictive Analytics</h1>
+    <p>Lightweight forecasts based on the last six months of evaluation data.</p>
+  </div>
+  <div class="d-flex gap-2">
+    <button class="ft-btn ft-sidebar-toggle"><i class="bi bi-list"></i></button>
+  </div>
+</div>
+
+<div class="row g-3 mb-3">
+  <div class="col-md-3">
+    <div class="ft-card h-100">
+      <small class="text-muted text-uppercase">Predicted Highest</small>
+      {% if predicted_highest %}
+        <h4 class="mt-1">{{ predicted_highest.name }}</h4>
+        <div class="ft-counter">+{{ predicted_highest.delta|floatformat:2 }}</div>
+      {% else %}<p class="text-muted">No data.</p>{% endif %}
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="ft-card h-100">
+      <small class="text-muted text-uppercase">Predicted Lowest</small>
+      {% if predicted_lowest %}
+        <h4 class="mt-1">{{ predicted_lowest.name }}</h4>
+        <div class="ft-counter">{{ predicted_lowest.delta|floatformat:2 }}</div>
+      {% else %}<p class="text-muted">No data.</p>{% endif %}
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="ft-card h-100">
+      <small class="text-muted text-uppercase">Predicted Best Dept</small>
+      {% if predicted_best_dept %}
+        <h4 class="mt-1">{{ predicted_best_dept.name }}</h4>
+        <div class="ft-counter">+{{ predicted_best_dept.data.delta|floatformat:2 }}</div>
+      {% else %}<p class="text-muted">No data.</p>{% endif %}
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="ft-card h-100">
+      <small class="text-muted text-uppercase">Predicted Satisfaction</small>
+      <div class="ft-counter">{{ system_forecast.predicted }}%</div>
+      <small class="text-muted">Δ {{ system_forecast.delta|floatformat:2 }} pts</small>
+    </div>
+  </div>
+</div>
+
+<div class="row g-3">
+  <div class="col-12">
+    <div class="ft-card">
+      <h5 class="mb-3"><i class="bi bi-graph-up-arrow me-2 text-accent"></i>Faculty Forecast (next 3 months)</h5>
+      <canvas id="ftForecast" height="120"></canvas>
+    </div>
+  </div>
+  <div class="col-12">
+    <div class="ft-card">
+      <h5 class="mb-3"><i class="bi bi-bar-chart-line me-2 text-accent"></i>Grade Level Forecast</h5>
+      <canvas id="ftDeptForecast" height="120"></canvas>
+    </div>
+  </div>
+
+  <div class="col-12">
+    <div class="ft-card">
+      <h5 class="mb-3"><i class="bi bi-lightbulb me-2 text-accent"></i>AI Recommendations</h5>
+      <ul class="list-unstyled m-0">
+        {% for f in faculty_forecasts %}
+          {% if f.delta < 0 %}
+            <li class="py-2">
+              <i class="bi bi-arrow-down-right text-danger me-2"></i>
+              <strong>{{ f.name }}</strong> is projected to drop by {{ f.delta|floatformat:2 }} pts – schedule mentoring and a teaching workshop.
+            </li>
+          {% elif f.delta > 0 %}
+            <li class="py-2">
+              <i class="bi bi-arrow-up-right text-success me-2"></i>
+              <strong>{{ f.name }}</strong> is projected to improve by {{ f.delta|floatformat:2 }} pts – consider recognising the trend.
+            </li>
+          {% endif %}
+        {% endfor %}
+        {% if not faculty_forecasts %}<li class="text-muted">No forecasts available – add evaluations to unlock predictions.</li>{% endif %}
+      </ul>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script>
+  var palette = ['#d4af7f','#38bdf8','#22c55e','#ef4444','#a78bfa','#f472b6','#facc15','#fb923c'];
+  var faculty = {{ faculty_forecasts_json|safe }};
+  var datasets = faculty.map(function (f, i) {
+    return { label: f.name, data: f.history.map(function (h, idx) { return h == null ? null : h; })
+                                 .concat(f.forecast.filter(function (h) { return h != null; })),
+             borderColor: palette[i % palette.length], backgroundColor: palette[i % palette.length] + '33',
+             spanGaps: true, tension: 0.3 };
+  });
+  var labels = faculty[0] ? faculty[0].labels : [];
+  new Chart(document.getElementById('ftForecast'), { type: 'line', data: { labels: labels, datasets: datasets }, options: { scales: { y: { beginAtZero: true, max: 5 } } } });
+
+  var depts = {{ department_forecasts_json|safe }};
+  var deptDatasets = depts.map(function (d, i) {
+    return { label: d.name,
+             data: d.data.history.map(function (h) { return h; }).concat(d.data.forecast.filter(function(h){return h != null;})),
+             borderColor: palette[i % palette.length], backgroundColor: palette[i % palette.length] + '33',
+             spanGaps: true, tension: 0.3 };
+  });
+  var deptLabels = depts[0] ? depts[0].data.labels : [];
+  new Chart(document.getElementById('ftDeptForecast'), { type: 'line', data: { labels: deptLabels, datasets: deptDatasets }, options: { scales: { y: { beginAtZero: true, max: 5 } } } });
+</script>
+{% endblock %}

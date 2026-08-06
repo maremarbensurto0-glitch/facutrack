@@ -1,0 +1,68 @@
+{% extends "ADMIN/admin_base.html" %}
+{% block admin_title %}Reports{% endblock %}
+
+{% block admin_content %}
+<div class="ft-page-header">
+  <div>
+    <h1>Generate Reports</h1>
+    <p>Export evaluation summaries and faculty rankings in PDF, Excel, CSV, or Word.</p>
+  </div>
+  <div class="d-flex gap-2">
+    <button class="ft-btn ft-sidebar-toggle"><i class="bi bi-list"></i></button>
+  </div>
+</div>
+
+<div class="row g-3">
+  <div class="col-lg-6">
+    <div class="ft-card h-100">
+      <h5 class="mb-2"><i class="bi bi-file-earmark-bar-graph me-2 text-accent"></i>Evaluation Summary</h5>
+      <p class="text-muted small">Department-level totals, satisfaction, and rating averages.</p>
+      <form method="get" action="{% url 'facutrack_app:download_report' %}" class="row g-2">
+        <input type="hidden" name="type" value="evaluation_summary">
+        <div class="col-6"><label class="form-label small">Start Date</label><input type="date" name="start" class="form-control"></div>
+        <div class="col-6"><label class="form-label small">End Date</label><input type="date" name="end" class="form-control"></div>
+        <div class="col-12">
+          <label class="form-label small">Format</label>
+          <div class="d-flex flex-wrap gap-2">
+            <button class="ft-btn" type="submit" name="format" value="csv">CSV</button>
+            <button class="ft-btn" type="submit" name="format" value="excel">Excel</button>
+            <button class="ft-btn" type="submit" name="format" value="pdf">PDF</button>
+            <button class="ft-btn" type="submit" name="format" value="word">Word</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="col-lg-6">
+    <div class="ft-card h-100">
+      <h5 class="mb-2"><i class="bi bi-trophy me-2 text-accent"></i>Faculty Ranking</h5>
+      <p class="text-muted small">Ranked faculty with department, score, and band.</p>
+      <form method="get" action="{% url 'facutrack_app:download_report' %}" class="row g-2">
+        <input type="hidden" name="type" value="faculty_ranking">
+        <div class="col-6"><label class="form-label small">Search</label><input type="text" name="q" class="form-control" placeholder="Faculty name"></div>
+        <div class="col-6">
+          <label class="form-label small">Grade Level</label>
+          <select name="department" class="form-select">
+            <option value="">All</option>
+            {% for d in departments %}<option value="{{ d.id }}">{{ d.department_name }}</option>{% endfor %}
+          </select>
+        </div>
+        <div class="col-12">
+          <label class="form-label small">Format</label>
+          <div class="d-flex flex-wrap gap-2">
+            <button class="ft-btn" type="submit" name="format" value="csv">CSV</button>
+            <button class="ft-btn" type="submit" name="format" value="excel">Excel</button>
+            <button class="ft-btn" type="submit" name="format" value="pdf">PDF</button>
+            <button class="ft-btn" type="submit" name="format" value="word">Word</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="ft-card mt-3">
+  <small class="text-muted">Reports are generated server-side. When a heavy export library (reportlab, openpyxl, python-docx) is not installed, FacuTrack automatically falls back to a CSV download so you never lose data.</small>
+</div>
+{% endblock %}

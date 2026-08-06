@@ -1,0 +1,56 @@
+{% extends "STAFF/staff_base.html" %}
+{% block staff_title %}Feedback Detail{% endblock %}
+
+{% block staff_content %}
+<div class="ft-page-header">
+  <div>
+    <h1>Feedback Detail</h1>
+    <p>{{ evaluation.department.department_name|default:"—" }} · {{ evaluation.course_section|default:"—" }}</p>
+  </div>
+  <div class="d-flex gap-2">
+    <button class="ft-btn ft-sidebar-toggle"><i class="bi bi-list"></i></button>
+    <a class="ft-btn" href="{% url 'facutrack_app:faculty_feedback' %}"><i class="bi bi-arrow-left"></i> Back</a>
+  </div>
+</div>
+
+<div class="row g-3">
+  <div class="col-lg-4">
+    <div class="ft-card h-100">
+      <small class="text-muted text-uppercase">Summary</small>
+      <dl class="row mt-2 mb-0">
+        <dt class="col-5 text-muted">Date</dt><dd class="col-7">{{ evaluation.created_at|date:"M d, Y H:i" }}</dd>
+        <dt class="col-5 text-muted">Grade Level</dt><dd class="col-7">{{ evaluation.department.department_name|default:"—" }}</dd>
+        <dt class="col-5 text-muted">Grade &amp; Section</dt><dd class="col-7">{{ evaluation.course_section|default:"—" }}</dd>
+        <dt class="col-5 text-muted">Evaluator</dt><dd class="col-7">Anonymous</dd>
+        <dt class="col-5 text-muted">Average</dt>
+        <dd class="col-7">
+          <span class="ft-pill ft-pill--{% if evaluation.average_rating >= 4 %}success{% elif evaluation.average_rating >= 3 %}warning{% else %}danger{% endif %}">
+            {{ evaluation.average_rating|floatformat:2 }} / 5
+          </span>
+        </dd>
+      </dl>
+    </div>
+  </div>
+  <div class="col-lg-8">
+    {% if evaluation.comments %}
+    <div class="ft-card mb-3">
+      <h5 class="mb-2"><i class="bi bi-chat-left-text me-2 text-accent"></i>Comments</h5>
+      <p class="mb-0">{{ evaluation.comments }}</p>
+    </div>
+    {% endif %}
+    <div class="ft-card h-100">
+      <h5 class="mb-3"><i class="bi bi-ui-checks me-2 text-accent"></i>Question-by-Question</h5>
+      {% for a in answers %}
+        <div class="py-2 {% if not forloop.last %}border-bottom border-secondary-subtle{% endif %}">
+          <div class="d-flex justify-content-between align-items-center">
+            <span>{{ forloop.counter }}. {{ a.questionnaire.question }}</span>
+            <span class="ft-pill ft-pill--{% if a.rating >= 4 %}success{% elif a.rating >= 3 %}warning{% else %}danger{% endif %}">{{ a.rating }} / 5</span>
+          </div>
+        </div>
+      {% empty %}
+        <p class="text-muted mb-0">No individual answers recorded.</p>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}

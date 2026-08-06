@@ -1,0 +1,336 @@
+{% extends "base.html" %}
+
+{% block title %}FacuTrack · Anonymous Faculty Evaluation System{% endblock %}
+
+{% block content %}
+
+<section id="home" class="ft-section" style="padding-top: 5rem;">
+  <div class="container">
+    <div class="row align-items-center g-5">
+      <div class="col-lg-7" data-aos="fade-up">
+        <span class="ft-eyebrow">Faculty Evaluation · Reimagined</span>
+        <h1 class="display-3 fw-medium mb-3">
+          Honest feedback.<br>
+          <span class="text-accent">Better teaching.</span>
+        </h1>
+        <p class="lead text-muted mb-4" style="max-width: 560px;">
+          FacuTrack is an editorial-grade evaluation platform that lets students rate
+          faculty anonymously, surfaces actionable insights for grade level heads, and
+          produces beautiful reports — without compromising confidentiality.
+        </p>
+        <div class="d-flex flex-wrap gap-2">
+          <a href="{% url 'facutrack_app:ratepage' %}" class="ft-btn ft-btn--primary">
+            <i class="bi bi-star-fill"></i> Evaluate Now
+          </a>
+          <a href="{% url 'facutrack_app:login' %}" class="ft-btn">
+            <i class="bi bi-box-arrow-in-right"></i> Login
+          </a>
+        </div>
+        <div class="mt-4 d-flex flex-wrap gap-3 text-muted small">
+          <span><i class="bi bi-shield-check text-accent me-1"></i> 100% Anonymous</span>
+          <span><i class="bi bi-graph-up-arrow text-accent me-1"></i> Real-time Analytics</span>
+          <span><i class="bi bi-file-earmark-pdf text-accent me-1"></i> PDF / Excel Reports</span>
+        </div>
+      </div>
+      <div class="col-lg-5" data-aos="fade-left">
+        <div class="ft-glass p-4 p-md-5" style="border-radius: 28px;">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <small class="text-muted text-uppercase">Live preview</small>
+            <span class="badge rounded-pill text-bg-dark">Confidential</span>
+          </div>
+          <div class="ft-card mb-3" style="padding: 1.25rem;">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <small class="text-muted">Grade Level</small>
+                <div class="fw-semibold">G7-Diamond</div>
+              </div>
+              <i class="bi bi-cpu fs-3 text-accent"></i>
+            </div>
+          </div>
+          <div class="ft-card mb-3" style="padding: 1.25rem;">
+            <small class="text-muted d-block mb-1">Faculty</small>
+            <div class="fw-semibold mb-2">Prof. A. Reyes</div>
+            <div class="d-flex gap-1">
+              {% for i in "12345" %}
+                <span class="badge rounded-pill text-bg-warning">★</span>
+              {% endfor %}
+            </div>
+          </div>
+          <div class="ft-card" style="padding: 1.25rem;">
+            <small class="text-muted d-block mb-2">Questionnaire Progress</small>
+            <div class="progress" style="height: 8px; background: var(--surface-2);">
+              <div class="progress-bar" role="progressbar" style="width: 65%; background: var(--accent);" aria-valuenow="65" aria-valuemin="0" aria-valuemax="100"></div>
+            </div>
+            <div class="d-flex justify-content-between mt-2 small text-muted">
+              <span>13 / 20 answered</span>
+              <span>Auto-saved</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="about" class="ft-section" style="background: var(--bg-soft);">
+  <div class="container">
+    <div class="row align-items-end mb-5">
+      <div class="col-md-8" data-aos="fade-up">
+        <span class="ft-eyebrow">About FacuTrack</span>
+        <h2 class="display-5">A platform designed for academic excellence.</h2>
+        <hr class="ft-divider">
+      </div>
+    </div>
+    <div class="row g-4">
+      <div class="col-md-6 col-lg-3" data-aos="fade-up" data-aos-delay="50">
+        <div class="ft-card h-100">
+          <div class="ft-feature-icon"><i class="bi bi-bullseye"></i></div>
+          <h4>Mission</h4>
+          <p class="text-muted mb-0">Empower institutions with transparent, data-driven feedback loops that elevate teaching quality.</p>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-3" data-aos="fade-up" data-aos-delay="100">
+        <div class="ft-card h-100">
+          <div class="ft-feature-icon"><i class="bi bi-eye"></i></div>
+          <h4>Vision</h4>
+          <p class="text-muted mb-0">A world where every classroom is shaped by honest, constructive evaluation.</p>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-3" data-aos="fade-up" data-aos-delay="150">
+        <div class="ft-card h-100">
+          <div class="ft-feature-icon"><i class="bi bi-flag"></i></div>
+          <h4>Purpose</h4>
+          <p class="text-muted mb-0">Replace paper forms and siloed spreadsheets with a single, modern evaluation workflow.</p>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-3" data-aos="fade-up" data-aos-delay="200">
+        <div class="ft-card h-100">
+          <div class="ft-feature-icon"><i class="bi bi-stars"></i></div>
+          <h4>Benefits</h4>
+          <p class="text-muted mb-0">Faster reporting, happier faculty, and insights that actually move the needle.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="features" class="ft-section">
+  <div class="container">
+    <div class="text-center mb-5" data-aos="fade-up">
+      <span class="ft-eyebrow">Features</span>
+      <h2 class="display-5">Everything you need to run fair evaluations.</h2>
+      <p class="text-muted mx-auto" style="max-width: 640px;">A complete toolkit for students, faculty, and administrators — designed to be intuitive from day one.</p>
+    </div>
+    <div class="row g-4">
+      <div class="col-md-6 col-lg-4" data-aos="zoom-in" data-aos-delay="50">
+        <div class="ft-card h-100">
+          <div class="ft-feature-icon"><i class="bi bi-incognito"></i></div>
+          <h5>Anonymous Evaluation</h5>
+          <p class="text-muted mb-0">No accounts, no IP tracking. Honest answers by default.</p>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-4" data-aos="zoom-in" data-aos-delay="100">
+        <div class="ft-card h-100">
+          <div class="ft-feature-icon"><i class="bi bi-trophy"></i></div>
+          <h5>Faculty Rankings</h5>
+          <p class="text-muted mb-0">Live leaderboards with grade level drill-down.</p>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-4" data-aos="zoom-in" data-aos-delay="150">
+        <div class="ft-card h-100">
+          <div class="ft-feature-icon"><i class="bi bi-file-earmark-bar-graph"></i></div>
+          <h5>Professional Reports</h5>
+          <p class="text-muted mb-0">PDF, Excel, Word and CSV exports — branded and print-ready.</p>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-4" data-aos="zoom-in" data-aos-delay="200">
+        <div class="ft-card h-100">
+          <div class="ft-feature-icon"><i class="bi bi-bar-chart-line"></i></div>
+          <h5>Real-time Analytics</h5>
+          <p class="text-muted mb-0">Satisfaction trends, distribution charts, and anomaly alerts.</p>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-4" data-aos="zoom-in" data-aos-delay="250">
+        <div class="ft-card h-100">
+          <div class="ft-feature-icon"><i class="bi bi-diagram-3"></i></div>
+          <h5>Grade Level Monitoring</h5>
+          <p class="text-muted mb-0">Compare grade levels side-by-side with clean visualisations.</p>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-4" data-aos="zoom-in" data-aos-delay="300">
+        <div class="ft-card h-100">
+          <div class="ft-feature-icon"><i class="bi bi-shield-lock"></i></div>
+          <h5>Secure System</h5>
+          <p class="text-muted mb-0">Encrypted credentials, audited access, and zero-trust defaults.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="statistics" class="ft-section" style="background: var(--bg-soft);">
+  <div class="container">
+    <div class="text-center mb-5" data-aos="fade-up">
+      <span class="ft-eyebrow">By the numbers</span>
+      <h2 class="display-5">Trusted across the institution.</h2>
+    </div>
+    <div class="row g-4 text-center">
+      <div class="col-6 col-md-3" data-aos="fade-up" data-aos-delay="50">
+        <div class="ft-card h-100">
+          <div class="ft-counter" data-target="{{ stats.faculty_count }}">0</div>
+          <small class="text-muted text-uppercase">Total Faculty</small>
+        </div>
+      </div>
+      <div class="col-6 col-md-3" data-aos="fade-up" data-aos-delay="100">
+        <div class="ft-card h-100">
+          <div class="ft-counter" data-target="{{ stats.department_count }}">0</div>
+          <small class="text-muted text-uppercase">Grade Levels</small>
+        </div>
+      </div>
+      <div class="col-6 col-md-3" data-aos="fade-up" data-aos-delay="150">
+        <div class="ft-card h-100">
+          <div class="ft-counter" data-target="{{ stats.evaluation_count }}">0</div>
+          <small class="text-muted text-uppercase">Total Evaluations</small>
+        </div>
+      </div>
+      <div class="col-6 col-md-3" data-aos="fade-up" data-aos-delay="200">
+        <div class="ft-card h-100">
+          <div class="ft-counter" data-target="{{ stats.satisfaction_percent }}" data-suffix="%">0%</div>
+          <small class="text-muted text-uppercase">Satisfaction</small>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="how" class="ft-section">
+  <div class="container">
+    <div class="text-center mb-5" data-aos="fade-up">
+      <span class="ft-eyebrow">How it works</span>
+      <h2 class="display-5">From class to insight — in five simple steps.</h2>
+    </div>
+    <div class="row g-4">
+      {% for step in "12345" %}
+        <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="{{ forloop.counter0|stringformat:'d' }}00">
+          <div class="ft-card h-100">
+            <span class="ft-step-number">{{ forloop.counter }}</span>
+            <h5>
+              {% if forloop.counter == 1 %}Select Grade Level
+              {% elif forloop.counter == 2 %}Select Faculty
+              {% elif forloop.counter == 3 %}Answer Questionnaire
+              {% elif forloop.counter == 4 %}Submit Evaluation
+              {% else %}Receive Receipt
+              {% endif %}
+            </h5>
+            <p class="text-muted mb-0">
+              {% if forloop.counter == 1 %}Choose the grade level that matches your course.
+              {% elif forloop.counter == 2 %}Pick the faculty member you want to evaluate.
+              {% elif forloop.counter == 3 %}Rate each question on the 5-point scale. Your progress auto-saves.
+              {% elif forloop.counter == 4 %}Submit securely. Responses are anonymised instantly.
+              {% else %}Get a receipt code you can use to track your submission.
+              {% endif %}
+            </p>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<section id="contact" class="ft-section" style="background: var(--bg-soft);">
+  <div class="container">
+    <div class="row align-items-center g-5">
+      <div class="col-lg-6" data-aos="fade-right">
+        <span class="ft-eyebrow">Contact</span>
+        <h2 class="display-5">Let's build better classrooms together.</h2>
+        <hr class="ft-divider">
+        <p class="text-muted">Have questions, feedback, or want to roll FacuTrack out to your institution? Our team responds within one business day.</p>
+        <ul class="list-unstyled mt-4">
+          <li class="mb-3 d-flex align-items-center gap-3">
+            <span class="ft-feature-icon m-0" style="width:44px;height:44px;font-size:1.1rem;"><i class="bi bi-envelope"></i></span>
+            <div>
+              <small class="text-muted d-block">Email</small>
+              <a href="mailto:hello@facutrack.app">hello@facutrack.app</a>
+            </div>
+          </li>
+          <li class="mb-3 d-flex align-items-center gap-3">
+            <span class="ft-feature-icon m-0" style="width:44px;height:44px;font-size:1.1rem;"><i class="bi bi-telephone"></i></span>
+            <div>
+              <small class="text-muted d-block">Phone</small>
+              <span>+63 (2) 8000 0000</span>
+            </div>
+          </li>
+          <li class="mb-3 d-flex align-items-center gap-3">
+            <span class="ft-feature-icon m-0" style="width:44px;height:44px;font-size:1.1rem;"><i class="bi bi-geo-alt"></i></span>
+            <div>
+              <small class="text-muted d-block">Address</small>
+              <span>Academic Affairs Office, Main Campus</span>
+            </div>
+          </li>
+        </ul>
+        <div class="d-flex gap-2 mt-4">
+          <a class="ft-btn" href="#" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
+          <a class="ft-btn" href="#" aria-label="Twitter"><i class="bi bi-twitter-x"></i></a>
+          <a class="ft-btn" href="#" aria-label="LinkedIn"><i class="bi bi-linkedin"></i></a>
+        </div>
+      </div>
+      <div class="col-lg-6" data-aos="fade-left">
+        <form class="ft-card" method="post" action="#contact">
+          {% csrf_token %}
+          <h5 class="mb-3">Send us a message</h5>
+          <div class="mb-3">
+            <label class="form-label" for="contactName">Name</label>
+            <input type="text" id="contactName" class="form-control" placeholder="Your name">
+          </div>
+          <div class="mb-3">
+            <label class="form-label" for="contactEmail">Email</label>
+            <input type="email" id="contactEmail" class="form-control" placeholder="you@school.edu">
+          </div>
+          <div class="mb-3">
+            <label class="form-label" for="contactMessage">Message</label>
+            <textarea id="contactMessage" class="form-control" rows="4" placeholder="How can we help?"></textarea>
+          </div>
+          <button type="submit" class="ft-btn ft-btn--primary w-100 justify-content-center">
+            <i class="bi bi-send"></i> Send Message
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  (function () {
+    var counters = document.querySelectorAll('.ft-counter');
+    if (!counters.length) return;
+    var animate = function (el) {
+      var target = parseFloat(el.getAttribute('data-target') || '0');
+      var suffix = el.getAttribute('data-suffix') || '';
+      var start = 0;
+      var duration = 1400;
+      var startTime = null;
+      function step(timestamp) {
+        if (!startTime) startTime = timestamp;
+        var progress = Math.min((timestamp - startTime) / duration, 1);
+        var eased = 1 - Math.pow(1 - progress, 3);
+        var value = start + (target - start) * eased;
+        el.textContent = (target % 1 === 0 ? Math.floor(value) : value.toFixed(1)) + suffix;
+        if (progress < 1) requestAnimationFrame(step);
+      }
+      requestAnimationFrame(step);
+    };
+    var observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          animate(entry.target);
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.4 });
+    counters.forEach(function (c) { observer.observe(c); });
+  })();
+</script>
+{% endblock %}

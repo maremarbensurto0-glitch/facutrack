@@ -1,0 +1,88 @@
+{% extends "ADMIN/admin_base.html" %}
+{% block admin_title %}Grade Level Comparison{% endblock %}
+
+{% block admin_content %}
+<div class="ft-page-header">
+  <div>
+    <h1>Grade Level Comparison Dashboard</h1>
+    <p>Compare grade levels across the five core performance axes.</p>
+  </div>
+  <div class="d-flex gap-2">
+    <button class="ft-btn ft-sidebar-toggle"><i class="bi bi-list"></i></button>
+  </div>
+</div>
+
+<div class="row g-3 mb-3">
+  <div class="col-md-3">
+    <div class="ft-card h-100">
+      <small class="text-muted text-uppercase">Highest Performing</small>
+      {% if highest %}<h4 class="mt-1">{{ highest.department_name }}</h4><div class="ft-counter">{{ highest.percentage }}%</div>{% else %}<p class="text-muted">No data.</p>{% endif %}
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="ft-card h-100">
+      <small class="text-muted text-uppercase">Lowest Performing</small>
+      {% if lowest %}<h4 class="mt-1">{{ lowest.department_name }}</h4><div class="ft-counter">{{ lowest.percentage }}%</div>{% else %}<p class="text-muted">No data.</p>{% endif %}
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="ft-card h-100">
+      <small class="text-muted text-uppercase">Total Grade Levels</small>
+      <div class="ft-counter">{{ rows|length }}</div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="ft-card h-100">
+      <small class="text-muted text-uppercase">System Average</small>
+      <div class="ft-counter">{{ average_system }}%</div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-3">
+  <div class="col-lg-6"><div class="ft-card"><h5>Radar</h5><canvas id="ftRadar" height="200"></canvas></div></div>
+  <div class="col-lg-6"><div class="ft-card"><h5>Grade Level Ratings</h5><canvas id="ftBar" height="200"></canvas></div></div>
+  <div class="col-lg-4"><div class="ft-card"><h5>Contribution</h5><canvas id="ftPie" height="220"></canvas></div></div>
+  <div class="col-lg-8">
+    <div class="ft-card p-0">
+      <div class="table-responsive">
+        <table class="ft-data-table m-0">
+          <thead>
+            <tr><th>Grade Level</th><th>Faculty</th><th>Evaluations</th><th>Average</th><th>Status</th><th>Trend</th></tr>
+          </thead>
+          <tbody>
+            {% for d in rows %}
+              <tr>
+                <td><strong>{{ d.department_name }}</strong></td>
+                <td>{{ d.faculty_count }}</td>
+                <td>{{ d.evaluations }}</td>
+                <td>{{ d.percentage }}%</td>
+                <td><span class="ft-pill ft-pill--{% if d.percentage >= 85 %}success{% elif d.percentage >= 60 %}warning{% else %}danger{% endif %}">{{ d.label }}</span></td>
+                <td>{% if d.percentage >= 75 %}<span class="text-success">Improving</span>{% elif d.percentage >= 60 %}<span class="text-warning">Stable</span>{% else %}<span class="text-danger">Declining</span>{% endif %}</td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="6" class="text-center text-muted py-4">No grade levels to compare yet.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script>
+  var palette = ['#d4af7f','#38bdf8','#22c55e','#ef4444','#a78bfa','#f472b6','#facc15'];
+  var radar = {{ radar_chart|safe }};
+  radar.datasets.forEach(function (ds, i) { ds.borderColor = palette[i % palette.length]; ds.backgroundColor = palette[i % palette.length] + '33'; });
+  new Chart(document.getElementById('ftRadar'), { type: 'radar', data: radar, options: { scales: { r: { suggestedMin: 0, suggestedMax: 100 } } } });
+
+  var bar = {{ bar_chart|safe }};
+  new Chart(document.getElementById('ftBar'), { type: 'bar', data: { labels: bar.labels, datasets: [{ data: bar.data, backgroundColor: palette }] }, options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, max: 100 } } } });
+
+  var pie = {{ pie_chart|safe }};
+  new Chart(document.getElementById('ftPie'), { type: 'pie', data: { labels: pie.labels, datasets: [{ data: pie.data, backgroundColor: palette }] }, options: { plugins: { legend: { position: 'bottom' } } } });
+</script>
+{% endblock %}

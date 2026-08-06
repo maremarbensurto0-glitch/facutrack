@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block title %}{% block staff_title %}Faculty{% endblock %} · FacuTrack{% endblock %}
+
+{% block navbar %}{% endblock %}
+{% block footer %}{% endblock %}
+
+{% block content %}
+<div class="ft-admin-shell">
+  <aside class="ft-sidebar">
+    <div class="ft-sidebar__brand">
+      <div class="d-flex align-items-center justify-content-between">
+        <span><i class="bi bi-mortarboard-fill text-accent me-2"></i>FacuTrack</span>
+        <button class="ft-btn ft-sidebar-close p-2" aria-label="Close sidebar">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+    </div>
+    <div class="ft-sidebar__group">Faculty</div>
+    <ul class="ft-sidebar__nav">
+      <li><a href="{% url 'facutrack_app:faculty_dashboard' %}" class="{% if active_nav == 'dashboard' %}active{% endif %}"><i class="bi bi-grid-1x2"></i> Home</a></li>
+      <li><a href="{% url 'facutrack_app:faculty_feedback' %}" class="{% if active_nav == 'feedback' %}active{% endif %}"><i class="bi bi-chat-square-text"></i> Feedback</a></li>
+      <li><a href="{% url 'facutrack_app:faculty_settings' %}" class="{% if active_nav == 'settings' %}active{% endif %}"><i class="bi bi-gear"></i> Settings</a></li>
+      <li><a href="{% url 'facutrack_app:landing' %}"><i class="bi bi-globe"></i> Public site</a></li>
+      <li><a href="#" data-bs-toggle="modal" data-bs-target="#ftLogoutModal"><i class="bi bi-box-arrow-right"></i> Logout</a></li>
+    </ul>
+  </aside>
+  <main class="ft-admin-main">
+    {% block staff_content %}{% endblock %}
+  </main>
+</div>
+
+<!-- Sidebar overlay for mobile -->
+<div class="ft-sidebar-overlay" id="ftSidebarOverlay"></div>
+
+<div class="modal fade" id="ftLogoutModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content ft-glass">
+      <div class="modal-body p-4 text-center">
+        <i class="bi bi-box-arrow-right fs-1 text-accent"></i>
+        <h4 class="mt-2">Confirm Logout</h4>
+        <p class="text-muted">Are you sure you want to logout?</p>
+        <div class="d-flex gap-2 justify-content-center mt-3">
+          <button type="button" class="ft-btn" data-bs-dismiss="modal">Cancel</button>
+          <a href="{% url 'facutrack_app:logout' %}" class="ft-btn ft-btn--primary">Yes, Logout</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function () {
+    var sidebar = document.querySelector('.ft-sidebar');
+    var overlay = document.getElementById('ftSidebarOverlay');
+    var toggles = document.querySelectorAll('.ft-sidebar-toggle');
+    var closeBtn = document.querySelector('.ft-sidebar-close');
+    
+    if (!sidebar) return;
+    
+    function openSidebar() {
+      sidebar.classList.add('is-open');
+      if (overlay) overlay.classList.add('is-visible');
+      document.body.style.overflow = 'hidden';
+    }
+    
+    function closeSidebar() {
+      sidebar.classList.remove('is-open');
+      if (overlay) overlay.classList.remove('is-visible');
+      document.body.style.overflow = '';
+    }
+    
+    toggles.forEach(function (btn) {
+      btn.addEventListener('click', function (e) {
+        e.preventDefault();
+        if (sidebar.classList.contains('is-open')) {
+          closeSidebar();
+        } else {
+          openSidebar();
+        }
+      });
+    });
+    
+    if (closeBtn) {
+      closeBtn.addEventListener('click', closeSidebar);
+    }
+    
+    if (overlay) {
+      overlay.addEventListener('click', closeSidebar);
+    }
+    
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && sidebar.classList.contains('is-open')) {
+        closeSidebar();
+      }
+    });
+  })();
+</script>
+{% endblock %}

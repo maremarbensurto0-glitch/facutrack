@@ -1,0 +1,176 @@
+{% extends "ADMIN/admin_base.html" %}
+{% block admin_title %}Dashboard{% endblock %}
+
+{% block admin_content %}
+<div class="ft-page-header">
+  <div>
+    <h1>Welcome back, {{ user_profile.display_name|default:user.username }}.</h1>
+    <p>Live overview of evaluations, faculty performance, and visitor activity.</p>
+  </div>
+  <div class="d-flex gap-2">
+    <button class="ft-btn ft-sidebar-toggle"><i class="bi bi-list"></i></button>
+    <a href="{% url 'facutrack_app:reports_page' %}" class="ft-btn"><i class="bi bi-file-earmark-bar-graph"></i> Reports</a>
+  </div>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-md-6 col-xl-3">
+    <div class="ft-card h-100">
+      <small class="text-muted text-uppercase">Total Faculty</small>
+      <div class="ft-counter">{{ kpis.total_faculty }}</div>
+    </div>
+  </div>
+  <div class="col-md-6 col-xl-3">
+    <div class="ft-card h-100">
+      <small class="text-muted text-uppercase">Total Grade Levels</small>
+      <div class="ft-counter">{{ kpis.total_departments }}</div>
+    </div>
+  </div>
+  <div class="col-md-6 col-xl-3">
+    <div class="ft-card h-100">
+      <small class="text-muted text-uppercase">Overall Rating</small>
+      <div class="ft-counter">{{ kpis.overall_rating_percent }}%</div>
+    </div>
+  </div>
+  <div class="col-md-6 col-xl-3">
+    <div class="ft-card h-100">
+      <small class="text-muted text-uppercase">Daily Visitors</small>
+      <div class="ft-counter">{{ kpis.daily_visitors }}</div>
+    </div>
+  </div>
+</div>
+
+<form class="ft-toolbar" method="get" id="ftRangeForm">
+  <label class="text-muted small">Date range:</label>
+  <select name="range" class="form-select" onchange="this.form.submit()">
+    {% for key, label in range_options.items %}
+      <option value="{{ key }}" {% if key == range_key %}selected{% endif %}>{{ label }}</option>
+    {% endfor %}
+  </select>
+</form>
+
+<div class="row g-3">
+  <div class="col-lg-8">
+    <div class="ft-card">
+      <h5 class="mb-3"><i class="bi bi-graph-up-arrow me-2 text-accent"></i>Trend Overview</h5>
+      <canvas id="ftLineChart" height="120"></canvas>
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <div class="ft-card h-100">
+      <h5 class="mb-3"><i class="bi bi-pie-chart me-2 text-accent"></i>Rating Distribution</h5>
+      <canvas id="ftPieChart" height="200"></canvas>
+    </div>
+  </div>
+
+  <div class="col-lg-6">
+    <div class="ft-card h-100">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="mb-0"><i class="bi bi-trophy me-2 text-accent"></i>Top Faculty</h5>
+        <a href="{% url 'facutrack_app:faculty_rankings' %}" class="ft-pill ft-pill--info">View all</a>
+      </div>
+      <div class="table-responsive">
+        <table class="ft-data-table">
+          <thead><tr><th>Faculty</th><th>Grade Level</th><th>Rating</th></tr></thead>
+          <tbody>
+            {% for f in faculty_rows %}
+              <tr>
+                <td><strong>{{ f.full_name }}</strong></td>
+                <td>{{ f.department }}</td>
+                <td>
+                  <span class="ft-pill ft-pill--{% if f.percentage >= 85 %}success{% elif f.percentage >= 60 %}warning{% else %}danger{% endif %}">
+                    {{ f.percentage }}%
+                  </span>
+                </td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="3" class="text-center text-muted py-3">No data yet.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-6">
+    <div class="ft-card h-100">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="mb-0"><i class="bi bi-bar-chart-line me-2 text-accent"></i>Grade Level Standings</h5>
+        <a href="{% url 'facutrack_app:department_comparison' %}" class="ft-pill ft-pill--info">Compare</a>
+      </div>
+      <div class="table-responsive">
+        <table class="ft-data-table">
+          <thead><tr><th>Grade Level</th><th>Faculty</th><th>Rating</th></tr></thead>
+          <tbody>
+            {% for d in department_rows %}
+              <tr>
+                <td><strong>{{ d.department_name }}</strong></td>
+                <td>{{ d.faculty_count }}</td>
+                <td>
+                  <span class="ft-pill ft-pill--{% if d.percentage >= 85 %}success{% elif d.percentage >= 60 %}warning{% else %}danger{% endif %}">
+                    {{ d.percentage }}%
+                  </span>
+                </td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="3" class="text-center text-muted py-3">No data yet.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12">
+    <div class="ft-card">
+      <h5 class="mb-3"><i class="bi bi-activity me-2 text-accent"></i>Recent Activities</h5>
+      <ul class="list-unstyled m-0">
+        {% for a in recent_activities %}
+          <li class="d-flex justify-content-between align-items-center py-2 border-bottom border-secondary-subtle">
+            <span><i class="bi bi-dot text-accent fs-4"></i> {{ a.activity }}</span>
+            <small class="text-muted">{{ a.timestamp|date:"M d, H:i" }}</small>
+          </li>
+        {% empty %}
+          <li class="text-muted text-center py-3">No activity yet.</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script>
+  var theme = document.documentElement.getAttribute('data-theme') || 'editorial-dark';
+  var palette = theme === 'editorial-dark'
+    ? { text: '#f5f5f5', muted: '#b6b6b6', accent: '#d4af7f', grid: 'rgba(255,255,255,0.08)' }
+    : { text: '#111114', muted: '#4a4a4a', accent: '#8a5a2b', grid: 'rgba(0,0,0,0.08)' };
+  Chart.defaults.color = palette.text;
+  Chart.defaults.borderColor = palette.grid;
+
+  var lineData = {{ line_chart|safe }};
+  new Chart(document.getElementById('ftLineChart'), {
+    type: 'line',
+    data: lineData,
+    options: {
+      responsive: true,
+      plugins: { legend: { labels: { color: palette.text } } },
+      scales: {
+        y:  { beginAtZero: true, grid: { color: palette.grid } },
+        y2: { beginAtZero: true, position: 'right', grid: { display: false }, max: 5 },
+      },
+    },
+  });
+
+  var pieData = {{ pie_chart|safe }};
+  new Chart(document.getElementById('ftPieChart'), {
+    type: 'doughnut',
+    data: { labels: pieData.labels,
+            datasets: [{ data: pieData.data,
+                         backgroundColor: ['#ef4444','#f97316','#eab308','#22c55e','#0ea5e9'],
+                         borderWidth: 0 }] },
+    options: { plugins: { legend: { position: 'bottom' } }, cutout: '60%' },
+  });
+</script>
+{% endblock %}

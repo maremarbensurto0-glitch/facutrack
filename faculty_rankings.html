@@ -1,0 +1,59 @@
+{% extends "ADMIN/admin_base.html" %}
+{% block admin_title %}Faculty Rankings{% endblock %}
+
+{% block admin_content %}
+<div class="ft-page-header">
+  <div>
+    <h1>Faculty Rankings</h1>
+    <p>Sorted by average score divided by the maximum (5) × 100.</p>
+  </div>
+  <div class="d-flex gap-2">
+    <button class="ft-btn ft-sidebar-toggle"><i class="bi bi-list"></i></button>
+    <a class="ft-btn" href="{% url 'facutrack_app:download_report' %}?type=faculty_ranking&format=csv&q={{ q }}&department={{ department_id }}"><i class="bi bi-filetype-csv"></i> CSV</a>
+    <a class="ft-btn" href="{% url 'facutrack_app:download_report' %}?type=faculty_ranking&format=excel&q={{ q }}&department={{ department_id }}"><i class="bi bi-file-earmark-excel"></i> Excel</a>
+    <a class="ft-btn" href="{% url 'facutrack_app:download_report' %}?type=faculty_ranking&format=pdf&q={{ q }}&department={{ department_id }}"><i class="bi bi-file-earmark-pdf"></i> PDF</a>
+  </div>
+</div>
+
+<form class="ft-toolbar" method="get">
+  <input type="search" name="q" value="{{ q }}" class="form-control" placeholder="Search faculty">
+  <select name="department" class="form-select">
+    <option value="">All grade levels</option>
+    {% for d in departments %}
+      <option value="{{ d.id }}" {% if department_id|stringformat:"s" == d.id|stringformat:"s" %}selected{% endif %}>{{ d.department_name }}</option>
+    {% endfor %}
+  </select>
+  <button class="ft-btn" type="submit"><i class="bi bi-funnel"></i> Apply</button>
+</form>
+
+<div class="ft-card p-0">
+  <div class="table-responsive">
+    <table class="ft-data-table m-0">
+      <thead>
+        <tr><th>Rank</th><th>Faculty</th><th>Grade Level</th><th>Evaluations</th><th>Rating %</th><th>Status</th></tr>
+      </thead>
+      <tbody>
+        {% for r in rows %}
+          <tr>
+            <td><strong>#{{ forloop.counter }}</strong></td>
+            <td>{{ r.full_name }}</td>
+            <td>{{ r.department }}</td>
+            <td>{{ r.evaluations }}</td>
+            <td>
+              <div class="d-flex align-items-center gap-2">
+                <div class="progress flex-grow-1" style="height:6px;background:var(--surface-2);">
+                  <div class="progress-bar" style="width: {{ r.percentage }}%; background: var(--accent);"></div>
+                </div>
+                <span class="ft-pill ft-pill--{% if r.percentage >= 85 %}success{% elif r.percentage >= 60 %}warning{% else %}danger{% endif %}">{{ r.percentage }}%</span>
+              </div>
+            </td>
+            <td><span class="ft-pill ft-pill--info">{{ r.label }}</span></td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="6" class="text-center text-muted py-4">No faculty to rank yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

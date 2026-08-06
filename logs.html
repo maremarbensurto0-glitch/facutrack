@@ -1,0 +1,135 @@
+{% extends "ADMIN/admin_base.html" %}
+{% block admin_title %}System Logs{% endblock %}
+
+{% block admin_content %}
+<div class="ft-page-header">
+  <div>
+    <h1>System Logs</h1>
+    <p>Search, filter, and monitor every authenticated request in real time.</p>
+  </div>
+  <div class="d-flex gap-2">
+    <button class="ft-btn ft-sidebar-toggle"><i class="bi bi-list"></i></button>
+    <button class="ft-btn" data-bs-toggle="modal" data-bs-target="#ftClearLogsModal"><i class="bi bi-eraser"></i> Clear</button>
+  </div>
+</div>
+
+<form class="ft-toolbar" method="get">
+  <input type="search" name="q" value="{{ q }}" class="form-control" placeholder="Search IP, endpoint, user">
+  <input type="date" name="start" class="form-control">
+  <input type="date" name="end" class="form-control">
+  <select name="method" class="form-select">
+    <option value="">All methods</option>
+    <option value="GET"  {% if method == 'GET'  %}selected{% endif %}>GET</option>
+    <option value="POST" {% if method == 'POST' %}selected{% endif %}>POST</option>
+  </select>
+  <button class="ft-btn" type="submit"><i class="bi bi-funnel"></i> Apply</button>
+</form>
+
+<div class="row g-3">
+  <div class="col-lg-3">
+    <div class="ft-card">
+      <h6 class="text-uppercase text-muted small mb-3">Recorded IPs</h6>
+      <div class="d-flex flex-wrap gap-1" style="max-height: 320px; overflow:auto;">
+        {% for ip in visitor_ips %}
+          <span class="ft-pill">{{ ip|default:"—" }}</span>
+        {% empty %}
+          <small class="text-muted">No IPs recorded yet.</small>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-9">
+    <div class="ft-card mb-3">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <h6 class="mb-0"><i class="bi bi-terminal me-2 text-accent"></i>Real-Time Console</h6>
+        <label class="form-check form-switch m-0">
+          <input class="form-check-input" type="checkbox" id="ftAutoRefresh" checked>
+          <span class="form-check-label small">Auto-refresh</span>
+        </label>
+      </div>
+      <div id="ftConsole" class="p-3 rounded" style="background:#000;color:#d4af7f;font-family:'JetBrains Mono',monospace;font-size:.85rem;height:180px;overflow:auto;">
+        <div class="text-muted">Waiting for events…</div>
+      </div>
+    </div>
+
+    <div class="ft-card p-0">
+      <div class="table-responsive">
+        <table class="ft-data-table m-0">
+          <thead>
+            <tr><th>Timestamp</th><th>IP</th><th>Method</th><th>Endpoint</th><th>User</th><th>Status</th></tr>
+          </thead>
+          <tbody>
+            {% for l in page %}
+              <tr>
+                <td>{{ l.timestamp|date:"M d H:i:s" }}</td>
+                <td>{{ l.ip_address|default:"—" }}</td>
+                <td><span class="ft-pill ft-pill--{% if l.method == 'POST' %}warning{% else %}info{% endif %}">{{ l.method }}</span></td>
+                <td><code class="small">{{ l.endpoint }}</code></td>
+                <td>{{ l.user.username|default:"—" }}</td>
+                <td>{{ l.response_status }}</td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="6" class="text-center text-muted py-4">No log entries.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% if page.has_other_pages %}
+<nav class="mt-3"><ul class="pagination justify-content-center">
+  {% if page.has_previous %}<li class="page-item"><a class="page-link" href="?page={{ page.previous_page_number }}&q={{ q }}&method={{ method }}">Previous</a></li>{% endif %}
+  <li class="page-item disabled"><span class="page-link">Page {{ page.number }} of {{ page.paginator.num_pages }}</span></li>
+  {% if page.has_next %}<li class="page-item"><a class="page-link" href="?page={{ page.next_page_number }}&q={{ q }}&method={{ method }}">Next</a></li>{% endif %}
+</ul></nav>
+{% endif %}
+
+<div class="modal fade" id="ftClearLogsModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content ft-glass">
+      <div class="modal-body p-4 text-center">
+        <i class="bi bi-eraser fs-1 text-accent"></i>
+        <h4 class="mt-2">Clear all logs?</h4>
+        <p class="text-muted">This action permanently removes every recorded log entry.</p>
+        <form method="post" action="{% url 'facutrack_app:clear_logs' %}" class="d-inline">
+          {% csrf_token %}
+          <button type="button" class="ft-btn" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="ft-btn ft-btn--primary">Yes, clear</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  (function () {
+    var consoleEl = document.getElementById('ftConsole');
+    var toggle = document.getElementById('ftAutoRefresh');
+    if (!consoleEl) return;
+    var timer = null;
+    function poll() {
+      fetch('{% url "facutrack_app:logs_json" %}', { credentials: 'same-origin' })
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+          if (!data.logs || !data.logs.length) {
+            consoleEl.innerHTML = '<div class="text-muted">No events yet…</div>';
+            return;
+          }
+          consoleEl.innerHTML = data.logs.map(function (l) {
+            return '<div>[' + l.timestamp + '] ' + l.ip_address + ' ' + l.method + ' ' + l.endpoint + ' (' + l.status + ')</div>';
+          }).join('');
+          consoleEl.scrollTop = consoleEl.scrollHeight;
+        });
+    }
+    function start() { poll(); timer = setInterval(poll, 5000); }
+    function stop()  { if (timer) clearInterval(timer); }
+    if (toggle) toggle.addEventListener('change', function () { toggle.checked ? start() : stop(); });
+    start();
+  })();
+</script>
+{% endblock %}

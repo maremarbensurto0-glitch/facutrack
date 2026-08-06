@@ -1,0 +1,107 @@
+{% extends "ADMIN/admin_base.html" %}
+{% block admin_title %}AI Insights{% endblock %}
+
+{% block admin_content %}
+<div class="ft-page-header">
+  <div>
+    <h1>AI Performance Insights</h1>
+    <p>Rule-based analysis of every faculty member's evaluation history.</p>
+  </div>
+  <div class="d-flex gap-2">
+    <button class="ft-btn ft-sidebar-toggle"><i class="bi bi-list"></i></button>
+  </div>
+</div>
+
+<form class="ft-toolbar" method="get">
+  <input type="search" name="q" value="{{ q }}" class="form-control" placeholder="Search faculty">
+  <select name="department" class="form-select">
+    <option value="">All grade levels</option>
+    {% for d in departments %}
+      <option value="{{ d.id }}" {% if department_id|stringformat:"s" == d.id|stringformat:"s" %}selected{% endif %}>{{ d.department_name }}</option>
+    {% endfor %}
+  </select>
+  <button class="ft-btn" type="submit"><i class="bi bi-funnel"></i> Apply</button>
+</form>
+
+<div class="row g-3 mb-3">
+  <div class="col-md-3">
+    <div class="ft-card h-100">
+      <small class="text-muted text-uppercase">Highest Rated</small>
+      {% if kpis.highest %}
+        <h4 class="mt-1">{{ kpis.highest.full_name }}</h4>
+        <div class="ft-counter">{{ kpis.highest.percentage }}%</div>
+        <small class="text-muted">{{ kpis.highest.label }}</small>
+      {% else %}<p class="text-muted">No data.</p>{% endif %}
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="ft-card h-100">
+      <small class="text-muted text-uppercase">Lowest Rated</small>
+      {% if kpis.lowest %}
+        <h4 class="mt-1">{{ kpis.lowest.full_name }}</h4>
+        <div class="ft-counter">{{ kpis.lowest.percentage }}%</div>
+        <small class="text-muted">{{ kpis.lowest.label }}</small>
+      {% else %}<p class="text-muted">No data.</p>{% endif %}
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="ft-card h-100">
+      <small class="text-muted text-uppercase">Most Improved</small>
+      {% if kpis.most_improved %}
+        <h4 class="mt-1">{{ kpis.most_improved.full_name }}</h4>
+        <div class="ft-counter">{{ kpis.most_improved.percentage }}%</div>
+        <small class="text-muted">{{ kpis.most_improved.label }}</small>
+      {% else %}<p class="text-muted">No data.</p>{% endif %}
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="ft-card h-100">
+      <small class="text-muted text-uppercase">Needs Improvement</small>
+      {% if kpis.needs_improvement %}
+        <h4 class="mt-1">{{ kpis.needs_improvement.full_name }}</h4>
+        <div class="ft-counter">{{ kpis.needs_improvement.percentage }}%</div>
+        <small class="text-muted">{{ kpis.needs_improvement.label }}</small>
+      {% else %}<p class="text-muted">No data.</p>{% endif %}
+    </div>
+  </div>
+</div>
+
+<div class="row g-3">
+  {% for i in insights %}
+    <div class="col-md-6 col-xl-4">
+      <div class="ft-card h-100 d-flex flex-column">
+        <div class="d-flex justify-content-between align-items-start mb-2">
+          <div>
+            <h5 class="mb-0">{{ i.full_name }}</h5>
+            <small class="text-muted">{{ i.department }}</small>
+          </div>
+          <span class="ft-pill ft-pill--{% if i.percentage >= 85 %}success{% elif i.percentage >= 60 %}warning{% else %}danger{% endif %}">{{ i.percentage }}%</span>
+        </div>
+
+        <p class="small text-muted">{{ i.executive_summary }}</p>
+
+        {% if i.strengths %}
+          <h6 class="text-success small text-uppercase mt-2">Strengths</h6>
+          <ul class="small ps-3 mb-2">{% for s in i.strengths %}<li>{{ s }}</li>{% endfor %}</ul>
+        {% endif %}
+        {% if i.weaknesses %}
+          <h6 class="text-danger small text-uppercase mt-2">Weaknesses</h6>
+          <ul class="small ps-3 mb-2">{% for w in i.weaknesses %}<li>{{ w }}</li>{% endfor %}</ul>
+        {% endif %}
+        {% if i.recommendations %}
+          <h6 class="text-accent small text-uppercase mt-2">Recommendations</h6>
+          <ul class="small ps-3 mb-0">{% for r in i.recommendations %}<li>{{ r }}</li>{% endfor %}</ul>
+        {% endif %}
+
+        <div class="mt-auto pt-3 d-flex justify-content-end">
+          <a class="ft-btn" href="{% url 'facutrack_app:ai_faculty_report' i.faculty_id %}">
+            <i class="bi bi-file-earmark-text"></i> Full report
+          </a>
+        </div>
+      </div>
+    </div>
+  {% empty %}
+    <div class="col-12"><div class="ft-empty">No faculty match the current filters.</div></div>
+  {% endfor %}
+</div>
+{% endblock %}

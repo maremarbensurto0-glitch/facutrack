@@ -1,0 +1,75 @@
+{% extends "STAFF/staff_base.html" %}
+{% block staff_title %}Feedback{% endblock %}
+
+{% block staff_content %}
+<div class="ft-page-header">
+  <div><h1>Feedback</h1><p>All evaluations submitted about you.</p></div>
+  <div class="d-flex gap-2">
+    <button class="ft-btn ft-sidebar-toggle"><i class="bi bi-list"></i></button>
+    <a class="ft-btn" href="{% url 'facutrack_app:faculty_dashboard' %}"><i class="bi bi-arrow-left"></i> Back to Dashboard</a>
+  </div>
+</div>
+
+<div class="row g-3 mb-3">
+  <div class="col-md-4">
+    <div class="ft-card h-100">
+      <small class="text-muted text-uppercase">Total Evaluations</small>
+      <div class="ft-counter">{{ page.paginator.count }}</div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="ft-card h-100">
+      <small class="text-muted text-uppercase">Average Rating</small>
+      <div class="ft-counter">{{ summary.percentage }}%</div>
+      <span class="ft-pill ft-pill--info">{{ summary.label }}</span>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="ft-card h-100">
+      <small class="text-muted text-uppercase">Status</small>
+      <div class="ft-counter">
+        <i class="bi bi-{% if summary.percentage >= 60 %}check-circle-fill text-success{% else %}exclamation-circle-fill text-danger{% endif %}"></i>
+      </div>
+      <span class="ft-pill ft-pill--{% if summary.percentage >= 60 %}success{% else %}danger{% endif %}">
+        {% if summary.percentage >= 60 %}Passed{% else %}Failed{% endif %} Performance
+      </span>
+    </div>
+  </div>
+</div>
+
+<div class="ft-card p-0">
+  <div class="table-responsive">
+    <table class="ft-data-table m-0">
+      <thead>
+        <tr><th>Date</th><th>Grade Level</th><th>Grade &amp; Section</th><th>Evaluator</th><th>Average</th><th>Action</th></tr>
+      </thead>
+      <tbody>
+        {% for e in page %}
+          <tr>
+            <td>{{ e.created_at|date:"M d, Y H:i" }}</td>
+            <td>{{ e.department.department_name|default:"—" }}</td>
+            <td>{{ e.course_section|default:"—" }}</td>
+            <td>Anonymous</td>
+            <td>
+              <span class="ft-pill ft-pill--{% if e.average_rating >= 4 %}success{% elif e.average_rating >= 3 %}warning{% else %}danger{% endif %}">
+                {{ e.average_rating|floatformat:2 }}
+              </span>
+            </td>
+            <td><a class="ft-btn" href="{% url 'facutrack_app:faculty_feedback_detail' e.id %}"><i class="bi bi-eye"></i> View</a></td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="6" class="text-center text-muted py-4">No feedback yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% if page.has_other_pages %}
+<nav class="mt-3"><ul class="pagination justify-content-center">
+  {% if page.has_previous %}<li class="page-item"><a class="page-link" href="?page={{ page.previous_page_number }}">Previous</a></li>{% endif %}
+  <li class="page-item disabled"><span class="page-link">Page {{ page.number }} of {{ page.paginator.num_pages }}</span></li>
+  {% if page.has_next %}<li class="page-item"><a class="page-link" href="?page={{ page.next_page_number }}">Next</a></li>{% endif %}
+</ul></nav>
+{% endif %}
+{% endblock %}

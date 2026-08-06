@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{% block admin_title %}Admin{% endblock %} · FacuTrack{% endblock %}
+
+{% block navbar %}{% endblock %}
+{% block footer %}{% endblock %}
+
+{% block content %}
+<div class="ft-admin-shell">
+  {% include "ADMIN/_sidebar.html" %}
+  <main class="ft-admin-main">
+    {% block admin_content %}{% endblock %}
+  </main>
+</div>
+
+<!-- Sidebar overlay for mobile -->
+<div class="ft-sidebar-overlay" id="ftSidebarOverlay"></div>
+
+<script>
+  (function () {
+    var sidebar = document.querySelector('.ft-sidebar');
+    var overlay = document.getElementById('ftSidebarOverlay');
+    var toggles = document.querySelectorAll('.ft-sidebar-toggle');
+    var closeBtn = document.querySelector('.ft-sidebar-close');
+    
+    if (!sidebar) return;
+    
+    function openSidebar() {
+      sidebar.classList.add('is-open');
+      if (overlay) overlay.classList.add('is-visible');
+      document.body.style.overflow = 'hidden';
+    }
+    
+    function closeSidebar() {
+      sidebar.classList.remove('is-open');
+      if (overlay) overlay.classList.remove('is-visible');
+      document.body.style.overflow = '';
+    }
+    
+    toggles.forEach(function (btn) {
+      btn.addEventListener('click', function (e) {
+        e.preventDefault();
+        if (sidebar.classList.contains('is-open')) {
+          closeSidebar();
+        } else {
+          openSidebar();
+        }
+      });
+    });
+    
+    if (closeBtn) {
+      closeBtn.addEventListener('click', closeSidebar);
+    }
+    
+    if (overlay) {
+      overlay.addEventListener('click', closeSidebar);
+    }
+    
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && sidebar.classList.contains('is-open')) {
+        closeSidebar();
+      }
+    });
+  })();
+</script>
+{% endblock %}
